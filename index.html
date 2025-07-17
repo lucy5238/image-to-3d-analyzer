@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片转3D建模描述工具</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🎯 图片转3D建模描述工具</h1>
+            <p class="subtitle">将平面图转换为AI可理解的结构化描述，生成Blender 3D模型</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-content">
+                    <div class="upload-icon">📁</div>
+                    <h3>上传您的平面图</h3>
+                    <p>支持 PNG, JPG, JPEG, GIF, BMP, SVG 格式</p>
+                    <p>拖拽图片到这里，或点击选择文件</p>
+                    <input type="file" id="fileInput" accept="image/*">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        选择图片文件
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="progressSection" class="hidden">
+            <div class="progress-container">
+                <h3>🔍 正在分析图片...</h3>
+                <div class="progress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <p id="progressText">准备中...</p>
+            </div>
+        </section>
+
+        <section id="previewSection" class="hidden">
+            <div class="image-preview-container">
+                <h3>📷 图片预览</h3>
+                <img id="imagePreview" alt="图片预览">
+                <div class="image-actions">
+                    <button class="btn btn-secondary" onclick="resetUpload()">重新上传</button>
+                    <button class="btn btn-primary" onclick="startAnalysis()">开始分析</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="resultsSection" class="hidden">
+            <div class="results-container">
+                <div class="result-tabs">
+                    <button class="tab-btn active" onclick="showTab('info')">📊 基本信息</button>
+                    <button class="tab-btn" onclick="showTab('ocr')">📖 文字识别</button>
+                    <button class="tab-btn" onclick="showTab('structure')">🏗️ 结构分析</button>
+                    <button class="tab-btn" onclick="showTab('template')">📋 描述模板</button>
+                </div>
+
+                <div class="tab-content">
+                    <div id="tab-info" class="tab-panel active">
+                        <h4>图片基本信息</h4>
+                        <div id="imageInfo" class="info-grid"></div>
+                    </div>
+
+                    <div id="tab-ocr" class="tab-panel">
+                        <h4>OCR文字识别结果</h4>
+                        <div id="ocrResult" class="ocr-result"></div>
+                        <div class="ocr-confidence">
+                            <span>识别置信度: <span id="ocrConfidence">--</span>%</span>
+                        </div>
+                    </div>
+
+                    <div id="tab-structure" class="tab-panel">
+                        <h4>图像结构分析</h4>
+                        <div id="structureAnalysis" class="structure-grid"></div>
+                    </div>
+
+                    <div id="tab-template" class="tab-panel">
+                        <h4>3D建模描述模板</h4>
+                        <div class="template-editor">
+                            <textarea id="descriptionTemplate" rows="20" placeholder="正在生成描述模板..."></textarea>
+                            <div class="template-actions">
+                                <button class="btn btn-success" onclick="copyToClipboard()">📋 复制描述</button>
+                                <button class="btn btn-info" onclick="downloadDescription()">💾 下载文件</button>
+                                <button class="btn btn-warning" onclick="generateBlenderScript()">🎯 生成Blender脚本</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="instructions">
+            <h3>📖 使用说明</h3>
+            <div class="instruction-grid">
+                <div class="instruction-card">
+                    <div class="instruction-icon">1️⃣</div>
+                    <h4>上传图片</h4>
+                    <p>选择您的平面图、流程图或设计图</p>
+                </div>
+                <div class="instruction-card">
+                    <div class="instruction-icon">2️⃣</div>
+                    <h4>AI分析</h4>
+                    <p>系统自动识别文字和分析图像结构</p>
+                </div>
+                <div class="instruction-card">
+                    <div class="instruction-icon">3️⃣</div>
+                    <h4>补充描述</h4>
+                    <p>根据模板填写详细的结构化描述</p>
+                </div>
+                <div class="instruction-card">
+                    <div class="instruction-icon">4️⃣</div>
+                    <h4>生成3D</h4>
+                    <p>获得Blender脚本，创建3D模型</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 图片转3D建模工具 | 
+                <a href="https://github.com/your-username/image-to-3d-analyzer" target="_blank">GitHub</a> | 
+                <a href="#" onclick="showHelp()">帮助</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- 帮助模态框 -->
+    <div id="helpModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeHelp()">&times;</span>
+            <h2>🆘 使用帮助</h2>
+            <div class="help-content">
+                <h3>支持的图片类型</h3>
+                <ul>
+                    <li>工艺流程图 (Process Flow Diagram)</li>
+                    <li>管道仪表图 (P&ID)</li>
+                    <li>设备布局图 (Equipment Layout)</li>
+                    <li>系统架构图 (System Architecture)</li>
+                    <li>电路图 (Circuit Diagram)</li>
+                </ul>
+                
+                <h3>最佳实践</h3>
+                <ul>
+                    <li>确保图片清晰，文字可读</li>
+                    <li>避免过于复杂的图片</li>
+                    <li>建议图片尺寸不超过5MB</li>
+                    <li>黑白对比度高的图片效果更好</li>
+                </ul>
+                
+                <h3>输出说明</h3>
+                <ul>
+                    <li>OCR识别：提取图中的文字信息</li>
+                    <li>结构分析：识别图形元素和连接关系</li>
+                    <li>描述模板：生成标准化的描述格式</li>
+                    <li>Blender脚本：可直接在Blender中运行的Python代码</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>Add main HTML file
