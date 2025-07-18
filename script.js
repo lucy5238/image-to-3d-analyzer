@@ -393,4 +393,5 @@ function displayStructureAnalysis() {
         <div class="structure-item">
             <div class="structure-icon">📏</div>
             <div class="structure-label">连接线</div>
-            <div class="structure-value">${structureData.hasLines ? '是' : '否'}</div>The remote agent crashed due to an error in the model call. Would you like to continue?Add JavaScript functionality
+            <div class="structure-value">${structureData.hasLines ? '是' : '否'}</div>The remote agent crashed due to an error in the model call. Would you like to continue?
+Add JavaScript functionality
